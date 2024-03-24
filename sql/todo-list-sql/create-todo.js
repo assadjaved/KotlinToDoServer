@@ -1,6 +1,7 @@
 // sql query to create a todo item
 
 const sqlPool = require('../sql-pool');
+const readTodoById = require('./read-todo-by-id');
 
 const createTodo = (title, description, priority) => {
     const query = `
@@ -16,7 +17,7 @@ const createTodo = (title, description, priority) => {
                 return;
             }
 
-            connection.query(query, [title, description, priority], (err, results, fields) => {
+            connection.query(query, [title, description, priority], async (err, results, fields) => {
                 connection.release();
                 if (err) {
                     console.error('Error executing the query: ', err);
@@ -24,7 +25,13 @@ const createTodo = (title, description, priority) => {
                     return;
                 }
 
-                resolve(results);
+                const id = results.insertId;
+                try {
+                    const todoItem = await readTodoById(id);
+                    resolve(todoItem[0]);
+                } catch (err) {
+                    reject(err);
+                }
             });
         });
     });

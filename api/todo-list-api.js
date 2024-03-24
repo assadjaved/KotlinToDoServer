@@ -21,8 +21,8 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { title, description, priority } = req.body;
-        await createTodo(title, description, priority);
-        res.status(201).send('Todo item created');
+        const todoItem = await createTodo(title, description, priority);
+        res.status(201).json(todoItem);
     } catch (err) {
         console.error(`Error creating a todo item: ${err}`);
         res.status(500).send('Error creating a todo item');
