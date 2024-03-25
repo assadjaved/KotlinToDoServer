@@ -45,9 +45,9 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        const { title, description, priority } = req.body;
-        await updateTodo(id, title, description, priority);
-        res.status(200).send('Todo item updated');
+        const { title, description, priority, completed_at } = req.body;
+        const todoItem = await updateTodo(id, title, description, priority, completed_at);
+        res.status(200).json(todoItem);
     } catch (err) {
         console.error(`Error updating a todo item: ${err}`);
         res.status(500).send('Error updating a todo item');

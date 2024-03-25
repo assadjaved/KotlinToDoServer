@@ -1,11 +1,12 @@
 // sql query to update a todo item
 
 const sqlPool = require('../sql-pool');
+const readTodoById = require('./read-todo-by-id');
 
-const updateTodo = (id, title, description, priority) => {
+const updateTodo = (id, title, description, priority, completedAt) => {
     const query = `
     UPDATE todo_items
-    SET title = ?, description = ?, priority = ?
+    SET title = ?, description = ?, priority = ?, completed_at = ?
     WHERE id = ?;
     `;
 
@@ -17,7 +18,7 @@ const updateTodo = (id, title, description, priority) => {
                 return;
             }
 
-            connection.query(query, [title, description, priority, id], (err, results, fields) => {
+            connection.query(query, [title, description, priority, completedAt, id], async (err, results, fields) => {
                 connection.release();
                 if (err) {
                     console.error('Error executing the query: ', err);
@@ -25,7 +26,12 @@ const updateTodo = (id, title, description, priority) => {
                     return;
                 }
 
-                resolve(results);
+                try {
+                    const todoItem = await readTodoById(id);
+                    resolve(todoItem[0]);
+                } catch (err) {
+                    reject(err);
+                }
             });
         });
     });
