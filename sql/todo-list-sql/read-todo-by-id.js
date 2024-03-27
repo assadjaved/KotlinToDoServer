@@ -2,11 +2,11 @@
 
 const sqlPool = require('../sql-pool');
 
-const query = `
-    SELECT * FROM todo_items WHERE id = ?;
-`;
-
 const readTodoById = (id) => {
+    const query = `
+    SELECT * FROM todo_items WHERE id = ?;
+    `;
+    
     return new Promise((resolve, reject) => {
         sqlPool.getConnection((err, connection) => {
             if (err) {

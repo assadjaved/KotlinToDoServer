@@ -33,8 +33,8 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        await deleteTodo(id);
-        res.status(200).send('Todo item deleted');
+        const todoItem = await deleteTodo(id);
+        res.status(200).json(todoItem);
     } catch (err) {
         console.error(`Error deleting a todo item: ${err}`);
         res.status(500).send('Error deleting a todo item');
