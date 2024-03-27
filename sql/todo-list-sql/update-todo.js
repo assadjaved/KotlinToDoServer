@@ -11,28 +11,38 @@ const updateTodo = (id, title, description, priority, completedAt) => {
     `;
 
     return new Promise((resolve, reject) => {
-        sqlPool.getConnection((err, connection) => {
+        sqlPool.getConnection(async (err, connection) => {
             if (err) {
                 console.error('Error connecting to the database: ', err);
                 reject(err);
                 return;
             }
 
-            connection.query(query, [title, description, priority, completedAt, id], async (err, results, fields) => {
-                connection.release();
-                if (err) {
-                    console.error('Error executing the query: ', err);
-                    reject(err);
+            try {
+                const todoItems = await readTodoById(id);
+                if (!todoItems.length) {
+                    reject(new Error('Todo item not found'));
                     return;
                 }
+                connection.query(query, [title, description, priority, completedAt, id], async (err, results, fields) => {
+                    connection.release();
+                    if (err) {
+                        console.error('Error executing the query: ', err);
+                        reject(err);
+                        return;
+                    }
 
-                try {
-                    const todoItem = await readTodoById(id);
-                    resolve(todoItem[0]);
-                } catch (err) {
-                    reject(err);
-                }
-            });
+                    try {
+                        const todoItem = await readTodoById(id);
+                        resolve(todoItem[0]);
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            } catch (err) {
+                reject(err);
+                return;
+            }
         });
     });
 }

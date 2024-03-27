@@ -1,6 +1,7 @@
 // sql query to delete a todo item
 
 const sqlPool = require('../sql-pool');
+const readTodoById = require('./read-todo-by-id');
 
 const deleteTodo = (id) => {
     const query = `
@@ -9,24 +10,33 @@ const deleteTodo = (id) => {
     `;
 
     return new Promise((resolve, reject) => {
-        sqlPool.getConnection((err, connection) => {
+        sqlPool.getConnection(async (err, connection) => {
             if (err) {
                 console.error('Error connecting to the database: ', err);
                 reject(err);
                 return;
             }
 
-            connection.query(query, [id], (err, results, fields) => {
-                connection.release();
-                console.log('results:', results);
-                if (err) {
-                    console.error('Error executing the query: ', err);
-                    reject(err);
+            try {
+                const todoItems = await readTodoById(id);
+                if (!todoItems.length) {
+                    reject(new Error('Todo item not found'));
                     return;
                 }
-
-                resolve(results);
-            });
+                connection.query(query, [id], (err, results, fields) => {
+                    connection.release();
+                    if (err) {
+                        console.error('Error executing the query: ', err);
+                        reject(err);
+                        return;
+                    }
+    
+                    resolve(todoItems[0]);
+                });
+            } catch (err) {
+                reject(err);
+                return;
+            }
         });
     });
 }
